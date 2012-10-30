@@ -33,9 +33,11 @@ class Board:
 				for c in xrange(self.c):
 					if not used[r][c] and self.letters[r][c] == word[0]:
 						used[r][c] = True
-						sc += int(self.owners[r][c] == '-' or self.owners[r][c] == 'r')
+						sc += int(self.owners[r][c] == '-')
+						sc += int(self.owners[r][c] == 'r')*1.5
 						maxScore = max(scoreAux(word[1:], sc), maxScore)
-						sc -= int(self.owners[r][c] == '-' or self.owners[r][c] == 'r')
+						sc -= int(self.owners[r][c] == '-')
+						sc -= int(self.owners[r][c] == 'r')*1.5
 						used[r][c] = False
 			return maxScore
 
@@ -58,6 +60,14 @@ def contains(haystack, needle):
 			j += 1
 	return True
 
+# b: a Board instance
+# wordl: a list of words that are at least 3 chars long
+# sample: the number of words to return
+def greedy(b, wordl, sample=20):
+	w = sorted(wordl, key=lambda a: -len(a))
+	w = sorted(w[:sample], key=lambda a: -b.score(a))
+	return w
+
 # see if we can make words using the unused characters
 # b: a Board instance
 # wordl: a list of words
@@ -69,13 +79,24 @@ def attemptWin(b, wordl):
 			stripped.append(w)
 	return greedy(b, stripped)
 
+# def simulate(player, b, wordl, sample):
+# bestScore = 0
+# for word in greedy sampling:
+# 	b' = place in board as color c, update board
+#	bestScore = max(bestScore, simulate(b', wordl, sample))
+# player: 'r' or 'b'
 # b: a Board instance
-# wordl: a list of words that are at least 3 chars long
+# wordl: a list of words
 # sample: the number of words to return
-def greedy(b, wordl, sample=20):
-	w = sorted(wordl, key=lambda a: -len(a))
-	w = sorted(w[:sample], key=lambda a: -b.score(a))
-	return w
+def simulate(player, b, wordl, sample=20):
+	winnars = attemptWin(b, wordl)
+	if winnars:
+		return winnars
+
+	testWords = greedy(b, wordl, sample)
+	for word in testWords:
+		bp = b.play(player, word)
+	pass
 
 def nicePrint(l):
 	for x in l:
